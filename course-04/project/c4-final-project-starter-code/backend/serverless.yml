@@ -71,6 +71,12 @@ functions:
           path: todos
           cors: true
           authorizer: Auth
+          documentation:
+            summary: "Create a todo"
+            description: "Create a todo"
+            requestModels:
+              "application/json": CreateTodoRequest
+          reqValidatorName: RequestBodyValidator
           request:
             schemas:
               application/json: ${file(models/create-todo-model.json)}
@@ -161,7 +167,17 @@ functions:
           - xray:PutTraceSegments
         Resource: 
           - '*'       
-
+custom:
+  documentation:
+    api:
+      info:
+        version: '1.0.0'
+        title: todo-api
+        description: serverless-api
+    models:
+      - name: CreateTodoRequest
+        contentType: "application/json"
+        schema: ${file(models/create-todo-model.json)}
 resources:
   Resources:
     # Add necessary AWS resources. You will need at least the following AWS resources
@@ -225,7 +241,14 @@ resources:
                 - DELETE
                 - HEAD
               MaxAge: 3000
-
+    RequestBodyValidator:
+      Type: AWS::ApiGateway::RequestValidator
+      Properties:
+        Name: 'request-body-validator'
+        RestApiId:
+          Ref: ApiGatewayRestApi
+        ValidateRequestBody: true
+        ValidateRequestParameters: false
     # TODO: Complete the policy below and attach it to the bucket defined above
     # For cross referencing the name of the bucket, use "!Ref AttachmentsBucket"
     BucketPolicy:
