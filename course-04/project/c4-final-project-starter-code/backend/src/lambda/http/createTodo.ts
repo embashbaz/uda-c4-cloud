@@ -4,8 +4,8 @@ import * as middy from 'middy'
 import { cors } from 'middy/middlewares'
 import { CreateTodoRequest } from '../../requests/CreateTodoRequest'
 //import { getUserId } from '../utils';
-import { createTodo } from '../../helpers/todosAcess'
-import { buildToDo } from '../../helpers/todos'
+import { createTodo } from '../../dataLayer/todosAcess'
+import { buildToDo } from '../../businessLogic/todos'
 
 export const handler = middy(
   async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
@@ -14,13 +14,28 @@ export const handler = middy(
 
    const finalToDo = buildToDo(newTodo, event)
 
+   if(finalToDo.name.length < 1){
+    return {
+      statusCode: 400,  
+      headers: {
+        "Access-Control-Allow-Origin": "*",
+      }, 
+      body: JSON.stringify({
+        item: "Name can not be blank"
+      })
+    }
+   }
+
     const toDoToCreate = await createTodo(finalToDo)
 
     
   return {
-    statusCode: 201,   
+    statusCode: 201,  
+    headers: {
+      "Access-Control-Allow-Origin": "*",
+    }, 
     body: JSON.stringify({
-      toDoToCreate
+      item: toDoToCreate
     })
   }
 }
